@@ -50,7 +50,7 @@ def generate_columns(data: list[str]):
 
 def generate_smart_columns(data: list[str]):
     columns = ceil(len(data) / NUMBER_OF_LINES)      # have 13 lines at most, variable number of columns
-    upper = len(data) // columns
+    upper = ceil(len(data) / columns)
 
     if floor(5 / columns) < 1:      # if data size is too big don't try to do columns
         columns = 1
@@ -59,13 +59,9 @@ def generate_smart_columns(data: list[str]):
     for i in range(upper):
         line = []
         for j in range(columns):
-            line.append(data[i + j * upper])
+            if i + j * upper < len(data):
+                line.append(data[i + j * upper])
         print((floor(5 / columns) * '\t').join(line))
-
-    line = []
-    for j in range(len(data) % columns):
-        line.append(data[upper + j])
-    print((floor(5 / columns) * '\t').join(line))
 
 
 def parse_input_parameters() -> Tuple[int, int]:
