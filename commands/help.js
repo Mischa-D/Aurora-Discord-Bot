@@ -5,17 +5,17 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('help')
 		.setDescription('prints a list of all available commands'),
-	async execute(message) {
+	async execute(interaction) {
 		let text = '';
 
 		const commandFiles = getFiles('./commands');
 		console.log(commandFiles);
-		for (const command of commandFiles) {
-			const tem = '.' + command;
-			const commandFile = require(tem);
-			text += `**${commandFile.name}** \t-\t ${commandFile.description}\n\n`;
+		for (const commandFile of commandFiles) {
+			const tem = '.' + commandFile;
+			const command = require(tem);
+			text += `**${command.data.name}** \t-\t ${command.data.description}\n\n`;
 		}
 
-		message.reply(`${text}`);
+		interaction.reply(`${text}`);
 	},
 };
