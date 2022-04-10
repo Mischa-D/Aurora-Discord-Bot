@@ -78,7 +78,7 @@ def parse_input_parameters() -> Tuple[int, int]:
         print(f"**Ticks per Block of {sys.argv[1]} (1 tick = 0.05s)**\n")
         return (1, BLOCK_HARDNESS_BLOCKS[block_name])
     elif block_name in BLOCK_HARDNESS_ORES:
-        print(f"**Ticks per Block of {sys.argv[1]} (Ore))(1 tick = 0.05s)**\n")
+        print(f"**Ticks per Block of {sys.argv[1]} (Ore)) (1 tick = 0.05s)**\n")
         return (2, BLOCK_HARDNESS_ORES[block_name])
     exit(6)
 
