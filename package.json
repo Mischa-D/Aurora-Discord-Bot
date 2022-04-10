@@ -1,0 +1,15 @@
+{
+  "name": "aurora_dcbot",
+  "version": "1.0.0",
+  "description": "Discord bot with yet to be determined features for Hypixel Skyblock",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "LagopusPolar",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^13.6.0",
+    "eslint": "^8.13.0"
+  }
+}
