@@ -1,9 +1,11 @@
 const getFiles = require('../get-files');
+const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
-	name: 'help',
-	description: 'prints a list of all available commands',
-	execute(message) {
+	data: new SlashCommandBuilder()
+		.setName('help')
+		.setDescription('prints a list of all available commands'),
+	async execute(message) {
 		let text = '';
 
 		const commandFiles = getFiles('./commands');

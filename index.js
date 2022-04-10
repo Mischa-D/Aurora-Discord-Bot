@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const config = require('config.json');
+const token = require('./config.json');
 
 const client = new Discord.Client({
 	intents: ['GUILDS', 'GUILD_MESSAGES'],
@@ -7,7 +7,7 @@ const client = new Discord.Client({
 
 
 client.once('ready', () => {
-	console.log('this is the only thing it does');
+	console.log('Bot online');
 });
 
 client.on('ready', () => {
@@ -15,4 +15,4 @@ client.on('ready', () => {
 	handler(client);
 });
 
-client.login(config.token);
+client.login(token.token);

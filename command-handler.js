@@ -1,26 +1,31 @@
+const { Collection } = require('discord.js');
 const getFiles = require('./get-files');
 
 module.exports = (client) => {
-	const commands = {};
-	const prefix = '&';
+	client.commands = new Collection();
 
 	const commandFiles = getFiles('./commands');
 	console.log(commandFiles);
-	for (const command of commandFiles) {
-		const commandFile = require(command);
-		commands[commandFile.name.toLowerCase()] = commandFile;
+	for (const commandFile of commandFiles) {
+		const command = require(commandFile);
+		client.commands.set(command.data.name, command);
 	}
 
-	console.log(commands);
+	console.log(client.commands);
 
-	client.on('messageCreate', message => {
-		if (!message.content.startsWith(prefix) || message.author.bot) return;
+	client.on('interactionCreate', async interaction => {
+		if (!interaction.isCommand()) return;
 
-		const args = message.content.slice(prefix.length).split(/ +/);
-		const command = args.shift().toLowerCase();
+		const command = client.commands.get(interaction.commandName);
 
-		if (!commands[command]) return;
+		if (!command) return;
 
-		commands[command].execute(message, ...args);
+		try {
+			await command.execute(interaction);
+		}
+		catch (error) {
+			console.error(error);
+			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+		}
 	});
 };

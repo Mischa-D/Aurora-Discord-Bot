@@ -1,9 +1,11 @@
 const { spawn } = require('child_process');
+const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
-	name: 'mining_times',
-	description: 'Get the amount of ticks needed to mine blocks with different mining speeds',
-	execute(message, ...args) {
+	data: new SlashCommandBuilder()
+		.setName('mining_times')
+		.setDescription('Get the amount of ticks needed to mine a block type with different mining speeds'),
+	async execute(message, ...args) {
 		console.log(args);
 		const child_python = spawn('python', ['./commands/mining_clusters.py', `${args[0]}`]);
 		child_python.stdout.on('data', (data) => {
