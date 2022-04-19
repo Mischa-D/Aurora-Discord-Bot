@@ -9,5 +9,6 @@ Features:
 
 Feature-Queue:
 * using Embeds
+* making the mining_profits command more accurate
 * using Hypixel API to fetch a players maximum possible mining speed and changing the output of `/mining_times` based on that
 * new commands
