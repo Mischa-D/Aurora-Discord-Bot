@@ -9,8 +9,8 @@ Features:
 
 
 Feature-Queue:
-* using Embeds
-* making the mining_profits command more accurate
 * using Hypixel API to fetch a players maximum possible mining speed and changing the output of `/mining_times` and `/mining_profits` based on that
+* completely rework mining_times
+* include blue cheese goblin omelette and hotm perks automatically into calulations
 * make `/mining_profits` be usable with other blocks than jade and with bazaar selling prizes
 * new commands

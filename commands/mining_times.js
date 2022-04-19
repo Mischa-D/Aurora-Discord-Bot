@@ -1,4 +1,5 @@
 const { spawn } = require('child_process');
+const embedTemplate = require('../create-embed-template');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
@@ -11,7 +12,14 @@ module.exports = {
 		console.log(block);
 		const child_python = spawn('python', ['./commands/mining_clusters.py', `${block}`]);
 		child_python.stdout.on('data', (data) => {
-			interaction.reply(`${data}`);
+			const embed = embedTemplate();
+			data = data.toString();
+			data = data.split('\n');
+			const title = data.shift();
+			data = data.join('\n');
+			embed.setTitle(title);
+			embed.addField('\u200B', data);
+			interaction.reply({ embeds: [embed] });
 		});
 		child_python.stderr.on('data', (data) => {
 			console.log(`${data}`);

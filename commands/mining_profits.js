@@ -1,4 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const createEmbedTemplate = require('../create-embed-template');
+const embedTemplate = require('../create-embed-template');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -8,9 +10,6 @@ module.exports = {
 		.addIntegerOption(option => option.setName('mining_fortune').setDescription('mining fortune shown in your stats + jungle amulet and fortunate').setRequired(true))
 		.addNumberOption(option => option.setName('pristine').setDescription('pristine as shown in your stats').setRequired(true)),
 	async execute(interaction) {
-		let text = '';
-		text += 'This doesnt work with instabreaking yet, values represent jade (or other gemstones with the same breaking power) when sold to NPC\n';
-
 		// should be replaced by variable values later, (value of jade for testing)
 		const block_hardness = 3200;
 		const pristine = interaction.options.getNumber('pristine');
@@ -34,14 +33,21 @@ module.exports = {
 		const total = pristine_drops + (1 - pristine / 100) * fortune_drops;
 
 		// output
-		text += '**In 1h you could:**\n\n';
+		const embed = createEmbedTemplate();
+		embed.setTitle('Mining Profits');
+		embed.setDescription('This doesnt work with instabreaking yet, values represent jade (or other gemstones with the same breaking power) when sold to NPC\n');
+
+		let text = '';
 		text += `\t - mine ${blocks} blocks\n`;
 		text += `\t - assuming the average base drop from blocks is 4.5: have ${blocks * 4.5} chances to activate Pristine\n`;
 		text += `\t - get ${(fortune_drops / (80 * 80)).toFixed(1)} Fine Gemstones if there was no Pristine\n`;
 		text += `\t - get ${(pristine_drops / (80 * 80)).toFixed(1)} Fine Gemstones from Pristine alone\n`;
 		text += `\t - get a total of ${(total / (80 * 80)).toFixed(1)} Fine Gemstones\n\n`;
-		text += `**worth ${(total * 0.0192 / (80 * 80)).toFixed(2)}M when sold to the NPC!**`;
+		embed.addFields(
+			{ name: 'In 1h you could:', value: text },
+			{ name: `**worth ${(total * 0.0192 / (80 * 80)).toFixed(2)}M when sold to the NPC!**`, value: '\u200B' }
+		);
 
-		interaction.reply(text);
+		interaction.reply({ embeds: [embed] });
 	},
 };

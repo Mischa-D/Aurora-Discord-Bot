@@ -36,16 +36,19 @@ def main():
             if Y[i - 1] > Y[i]:
                 output.append(f"{str(x)}, {str(Y[i])}")
 
-    generate_smart_columns(output)
+    generate_columns(output)
 
 
 def generate_columns(data: list[str]):
-    half = len(data) // 2
-    for i in range(half):
-        print(data[i], 16 * '\t', data[i + half])
+    lines = ceil(len(data) / 4)
 
-    if len(data) % 2:
-        print(data[-1])
+    for j in range(lines):
+        line = []
+        for i in range(4):
+            if j + i * lines >= len(data):
+                break
+            line.append(data[j + i * lines])
+        print('\t\t'.join(line))
 
 
 def generate_smart_columns(data: list[str]):
