@@ -18,16 +18,21 @@ module.exports = {
 		const mining_speed = interaction.options.getInteger('mining_speed');
 		const mining_fortune = interaction.options.getInteger('mining_fortune');
 
-		const blocks = (20 * 3600 / ((block_hardness * 30 / mining_speed)).toFixed(0)).toFixed(0);
+		const ticks_per_block = (block_hardness * 30 / mining_speed).toFixed(0);
+
+		// calculate stats
+		const blocks = (20 * 3600 / ticks_per_block).toFixed(0);
+		const base_drops = (blocks * 4.5).toFixed(0);
+		const fortune_drops = (1 + mining_fortune / 100) * base_drops;
+		const pristine_drops = 80 * fortune_drops * (pristine / 100);
+		const total = pristine_drops + (1 - pristine / 100) * fortune_drops;
+
+		// output
 		text += '**In 1h you could:**\n\n';
 		text += `\t - mine ${blocks} blocks\n`;
 		text += `\t - assuming the average base drop from blocks is 4.5: have ${blocks * 4.5} chances to activate Pristine\n`;
-		const base_drops = (blocks * 4.5).toFixed(0);
-		const fortune_drops = (1 + mining_fortune / 100) * base_drops;
 		text += `\t - get ${(fortune_drops / (80 * 80)).toFixed(1)} Fine Gemstones if there was no Pristine\n`;
-		const pristine_drops = 80 * fortune_drops * (pristine / 100);
 		text += `\t - get ${(pristine_drops / (80 * 80)).toFixed(1)} Fine Gemstones from Pristine alone\n`;
-		const total = pristine_drops + (1 - pristine / 100) * fortune_drops;
 		text += `\t - get a total of ${(total / (80 * 80)).toFixed(1)} Fine Gemstones\n\n`;
 		text += `**worth ${(total * 0.0192 / (80 * 80)).toFixed(2)}M when sold to the NPC!**`;
 
