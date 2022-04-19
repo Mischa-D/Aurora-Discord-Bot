@@ -1,4 +1,5 @@
 const getFiles = require('../get-files');
+const embedTemplate = require('../create-embed-template');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
@@ -6,16 +7,22 @@ module.exports = {
 		.setName('help')
 		.setDescription('prints a list of all available commands'),
 	async execute(interaction) {
-		let text = '';
+		const embed = embedTemplate();
+		embed.setTitle('Available commands');
 
 		const commandFiles = getFiles('./commands');
 		console.log(commandFiles);
 		for (const commandFile of commandFiles) {
 			const tem = '.' + commandFile;
 			const command = require(tem);
-			text += `**${command.data.name}** \t-\t ${command.data.description}\n\n`;
+			// print out options
+			let title = '';
+			for (const option of command.data.options) {
+				title += ` [${option.name}] `;
+			}
+			embed.addField(`/${command.data.name} ${title}`, `${command.data.description}`);
 		}
 
-		interaction.reply(`${text}`);
+		interaction.reply({ embeds: [embed] });
 	},
 };
