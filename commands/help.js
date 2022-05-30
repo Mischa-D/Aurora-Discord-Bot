@@ -11,7 +11,6 @@ module.exports = {
 		embed.setTitle('Available commands');
 
 		const commandFiles = getFiles('./commands');
-		console.log(commandFiles);
 		for (const commandFile of commandFiles) {
 			const tem = '.' + commandFile;
 			const command = require(tem);

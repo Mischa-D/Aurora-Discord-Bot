@@ -21,6 +21,7 @@ module.exports = (client) => {
 		if (!command) return;
 
 		try {
+			console.log(`User ${interaction.user} used command ${interaction.commandName}`);
 			await command.execute(interaction);
 		}
 		catch (error) {

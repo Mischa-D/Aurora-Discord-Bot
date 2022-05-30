@@ -1,9 +1,11 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { hypixel_api_key } = require('../config.json');
+const dotenv = require('dotenv');
 const https = require('https');
 const mojangAPI = require('mojang-api');
 
 const embedTemplate = require('../create-embed-template');
+
+dotenv.config();
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -26,7 +28,7 @@ module.exports = {
 
 		// get response and print it to console
 		function getResponse(err, res) {
-			const url = `https://api.hypixel.net/skyblock/profiles?key=${hypixel_api_key}&uuid=${res[0].id}`;
+			const url = `https://api.hypixel.net/skyblock/profiles?key=${process.env.HYPIXEL_API_KEY}&uuid=${res[0].id}`;
 
 			https.get(url, (response) => {
 				let data = '';

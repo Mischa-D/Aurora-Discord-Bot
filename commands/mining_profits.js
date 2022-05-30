@@ -44,7 +44,7 @@ module.exports = {
 		text += `\t - get a total of ${(total / (80 * 80)).toFixed(1)} Fine Gemstones\n\n`;
 		embed.addFields(
 			{ name: 'In 1h you could:', value: text },
-			{ name: `**worth ${(total * 0.0192 / (80 * 80)).toFixed(2)}M when sold to the NPC!**`, value: '\u200B' }
+			{ name: `**worth ${(total * 0.0192 / (80 * 80)).toFixed(2)}M when sold to the NPC!**`, value: '\u200B' },
 		);
 
 		interaction.reply({ embeds: [embed] });
