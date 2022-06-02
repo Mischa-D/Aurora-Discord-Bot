@@ -39,6 +39,9 @@ module.exports = {
 				response.on('end', () => {
 					const profileFruit = interaction.options.getString('profile-name');
 					let profileNumber = 0;
+					if (JSON.parse(data)['profiles'] == null) {
+						interaction.reply({ content: 'There was an error while executing this command!', ephemeral: false });
+					}
 					for (const [index, profile] of JSON.parse(data)['profiles'].entries()) {
 						if (profile['cute_name'] != profileFruit) continue;
 						profileNumber = index;
