@@ -1,5 +1,5 @@
 import sys
-from typing import Tuple
+from typing import Tuple, List
 from math import ceil, floor
 from block_hardness_data import BLOCK_HARDNESS_ORES, BLOCK_HARDNESS_BLOCKS
 
@@ -7,9 +7,9 @@ NUMBER_OF_LINES = 13
 
 
 def main():
-    X: list[int] = []
-    Y: list[int] = []
-    output: list[str] = []
+    X: List[int] = []
+    Y: List[int] = []
+    output: List[str] = []
 
     # flag ore = 1: no ore, ore = 2: ore
     ore, block_hardness = parse_input_parameters()
@@ -39,7 +39,7 @@ def main():
     generate_columns(output)
 
 
-def generate_columns(data: list[str]):
+def generate_columns(data: List[str]):
     lines = ceil(len(data) / 4)
 
     for j in range(lines):
@@ -51,7 +51,7 @@ def generate_columns(data: list[str]):
         print('\t\t'.join(line))
 
 
-def generate_smart_columns(data: list[str]):
+def generate_smart_columns(data: List[str]):
     columns = ceil(len(data) / NUMBER_OF_LINES)      # have 13 lines at most, variable number of columns
     upper = ceil(len(data) / columns)
 
