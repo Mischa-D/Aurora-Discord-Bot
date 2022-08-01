@@ -31,6 +31,7 @@ BLOCK_HARDNESS_ORES = {
     "gray mithril": 500,
     "green_mithril": 800,
     "green mithril": 800,
+    "mithril": 800,
     "blue_mithril": 1500,
     "blue mithril": 1500,
     "titanium": 2000,
