@@ -8,6 +8,7 @@ async function chooseProfile(profileData, fruit = null) {
 
 	for (const [index, profile] of profileData['profiles'].entries()) {
 		if (typeof fruit === 'string' && profile['cute_name'].toUpperCase() != fruit.toUpperCase()) continue;
+		else if (typeof fruit === typeof null && profile['last_save'] < profileData['profiles'][profileNumber]['last_save']) continue;
 		profileNumber = index;
 	}
 	return profileNumber;
