@@ -2,7 +2,6 @@ const dotenv = require('dotenv');
 const https = require('https');
 
 const mojangAPI = require('mojang-promise-api');
-const chooseProfile = require('./choose-profile');
 const api = new mojangAPI();
 
 dotenv.config();
@@ -63,4 +62,19 @@ async function getAPIData(url) {
 		// TODO: How do I get this error to be catched in hotm.js?
 		console.log(error);
 	}
+}
+
+
+// finds the profile with name <fruit> if given, else chooses a profile based on a certain metric
+// currently it simply takes the first profile in the array
+// TODO: better metric
+async function chooseProfile(profileData, fruit = null) {
+	let profileNumber = 0;
+
+	for (const [index, profile] of profileData['profiles'].entries()) {
+		if (typeof fruit === 'string' && profile['cute_name'].toUpperCase() != fruit.toUpperCase()) continue;
+		else if (typeof fruit === typeof null && profile['last_save'] < profileData['profiles'][profileNumber]['last_save']) continue;
+		profileNumber = index;
+	}
+	return profileNumber;
 }
