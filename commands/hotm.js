@@ -1,9 +1,8 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const dotenv = require('dotenv');
-const https = require('https');
-const mojangAPI = require('mojang-api');
 
 const embedTemplate = require('../create-embed-template');
+const fetchSkyblockProfile = require('../fetch-skyblock-profile');
 
 dotenv.config();
 
@@ -16,52 +15,42 @@ module.exports = {
 	async execute(interaction) {
 		// get uuid based on inputted minecraft name
 		const name = interaction.options.getString('minecraft-name');
+		const profileFruit = interaction.options.getString('profile-name');
+
+		let profileData;
 		try {
-			mojangAPI.nameToUuid(name, getResponse);
+			profileData = await fetchSkyblockProfile(name, profileFruit);
+
 		}
-		// TODO: why the hell does mojangAPI call cb.error for some errors and throws an error for others,
-		// but never uses the <err> parameter they require?
 		catch (error) {
 			console.error(error);
-			await interaction.reply({ content: 'There was an error while executing this command!' + error.message, ephemeral: true });
+			console.log(profileData);
+			await interaction.reply({ content: 'There was an error while executing this command!\n' + error.message, ephemeral: true });
 		}
 
-		// get response and print it to console
-		function getResponse(err, res) {
-			const url = `https://api.hypixel.net/skyblock/profiles?key=${process.env.HYPIXEL_API_KEY}&uuid=${res[0].id}`;
-
-			https.get(url, (response) => {
-				let data = '';
-				response.on('data', (chunk) => {
-					data += chunk;
-				});
-
-				response.on('end', () => {
-					const profileFruit = interaction.options.getString('profile-name');
-					let profileNumber = 0;
-					if (JSON.parse(data)['profiles'] == null) {
-						interaction.reply({ content: 'There was an error while executing this command!', ephemeral: false });
-					}
-					for (const [index, profile] of JSON.parse(data)['profiles'].entries()) {
-						if (profile['cute_name'] != profileFruit) continue;
-						profileNumber = index;
-					}
-					const text = (JSON.parse(data)['profiles'][profileNumber]['members'][res[0].id]['mining_core']['nodes']);
-					const embed = embedTemplate();
-					embed.setTitle(`${name}'s Heart of the Mountain on profile ${JSON.parse(data)['profiles'][profileNumber]['cute_name']}`);
-					embed.setDescription('as a worse version of the /mining command of the skyhelper bot this will not be a final feature. It rather serves as a first test command for using the Hypixel skyblock API.');
-					let perks = '';
-					Object.keys(text).forEach((key) => {
-						perks += `**${key}** \t ${text[key]} \n`;
-					});
-					embed.addField('Perks', perks);
-
-					interaction.reply({ embeds: [embed] });
-				});
-
-			}).on('error', (err) => {
-				console.log(`Error: ${err.message}`);
+		if (profileData == null) {
+			interaction.reply({ content: 'That player has never played skyblock before.', ephemeral: true });
+		}
+		const text = (profileData['profile']['mining_core']['nodes']);
+		const embed = embedTemplate();
+		embed.setTitle(`${name}'s Heart of the Mountain on profile ${profileData['profileName']}`);
+		embed.setDescription('as a worse version of the /mining command of the skyhelper bot this will not be a final feature. It rather serves as a first test command for using the Hypixel skyblock API.');
+		let perks = '';
+		try {
+			Object.keys(text).forEach((key) => {
+				perks += `**${key}** \t ${text[key]} \n`;
 			});
+			embed.addField('Perks', perks);
 		}
+		catch (err) {
+			if (err instanceof RangeError) {
+				embed.addField('Perks', 'no active perks');
+			}
+			else {
+				console.error(err);
+			}
+		}
+
+		interaction.reply({ embeds: [embed] });
 	},
 };

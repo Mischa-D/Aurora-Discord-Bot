@@ -17,6 +17,7 @@
     "eslint": "^8.13.0",
     "fetch": "^1.1.0",
     "https": "^1.0.0",
-    "mojang-api": "^0.0.2"
+    "mojang-api": "^0.0.2",
+    "mojang-promise-api": "^1.0.2"
   }
 }

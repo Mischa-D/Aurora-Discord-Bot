@@ -1,8 +1,9 @@
 const dotenv = require('dotenv');
 const https = require('https');
 
-const url = `https://api.hypixel.net/skyblock/profiles?key=${process.env.HYPIXEL_API_KEY}&uuid=10449010-26d2-43f9-932f-338aedc91e4e`;
 dotenv.config();
+
+const url = `https://api.hypixel.net/skyblock/profiles?key=${process.env.HYPIXEL_API_KEY}&uuid=10449010-26d2-43f9-932f-338aedc91e4e`;
 
 https.get(url, (res) => {
 	let data = '';
@@ -11,7 +12,7 @@ https.get(url, (res) => {
 	});
 
 	res.on('end', () => {
-		console.log(JSON.parse(data));
+		console.log(JSON.parse(data)['profiles']);
 	});
 
 }).on('error', (err) => {
