@@ -2,7 +2,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const dotenv = require('dotenv');
 
 const embedTemplate = require('../create-embed-template');
-const fetchSkyblockProfile = require('../fetch-skyblock-profile');
+const fetchSkyblockProfile = require('../functionsHypixelAPI/fetch-skyblock-profile');
 
 dotenv.config();
 
