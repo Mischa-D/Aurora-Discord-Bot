@@ -14,8 +14,7 @@ module.exports = {
 		.addStringOption(option => option.setName('profile-name').setDescription('the name of your profile')),
 	async execute(interaction) {
 		// get uuid based on inputted minecraft name
-		//const name = interaction.options.getString('minecraft-name');
-		const name = 'LagopusPolar';
+		const name = interaction.options.getString('minecraft-name');
 		const profileFruit = interaction.options.getString('profile-name');
 
 		let profileData;
