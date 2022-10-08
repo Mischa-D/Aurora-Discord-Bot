@@ -1,9 +1,7 @@
 const SkillXpPerLevel = require('../databases/skillExpPerLevel');
 
 function getLevel(xpAmount, levelSheet = SkillXpPerLevel) {
-	console.log(xpAmount);
 	if (typeof xpAmount != 'number') {
-		console.log('abandondened');
 		return 0;
 	}
 	let xpAtLevel = 0;
