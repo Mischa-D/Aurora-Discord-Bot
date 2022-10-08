@@ -14,7 +14,8 @@ module.exports = {
 		.addStringOption(option => option.setName('profile-name').setDescription('the name of your profile')),
 	async execute(interaction) {
 		// get uuid based on inputted minecraft name
-		const name = interaction.options.getString('minecraft-name');
+		// const name = interaction.options.getString('minecraft-name');
+		const name = 'LagopusPolar';
 		const profileFruit = interaction.options.getString('profile-name');
 
 		let profileData;
@@ -111,17 +112,22 @@ module.exports = {
 
 
 		/** ################### COLLECTIONS ############################# */
-		skyblockXP['Collections'] = (profileData['profile']['unlocked_coll_tiers'].length
-		- AMOUNT_SKYBLOCK_COLLECTIONS) * 4;
+		if (Object.keys(profileData['profile']).includes('unlocked_coll_tiers')) {
+			skyblockXP['Collections'] = (profileData['profile']['unlocked_coll_tiers'].length
+			- AMOUNT_SKYBLOCK_COLLECTIONS) * 4;
+		}
 
 
 		/** ################### COLLECTIONS ############################# */
 		// TODO: Red sand minion?
 		const xpPerMinionTier = [1, 1, 1, 1, 1, 1, 2, 3, 4, 6, 12, 24];
-		profileData['profile']['crafted_generators'].forEach(minion => {
-			const tier = minion.split('_').pop();
-			skyblockXP['Minions'] += xpPerMinionTier[tier - 1];
-		});
+		if (Object.keys(profileData['profile']).includes('crafted_generators')) {
+			profileData['profile']['crafted_generators'].forEach(minion => {
+				const tier = minion.split('_').pop();
+				skyblockXP['Minions'] += xpPerMinionTier[tier - 1];
+			});
+		}
+
 
 
 		/** ################### FAIRY SOULS ############################# */

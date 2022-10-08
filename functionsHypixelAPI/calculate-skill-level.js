@@ -1,6 +1,9 @@
 const SkillXpPerLevel = require('../databases/skillExpPerLevel');
 
 function getLevel(xpAmount, levelSheet = SkillXpPerLevel) {
+	if (typeof xpAmount != Number) {
+		return 0;
+	}
 	let xpAtLevel = 0;
 	for (let i = 0; i < levelSheet.length; i++) {
 		xpAtLevel += levelSheet[i];
