@@ -1,4 +1,5 @@
 const hotmExpPerLevel = [
+	0,
 	3000,
 	9000,
 	25000,
