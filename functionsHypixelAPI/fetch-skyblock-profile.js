@@ -13,60 +13,66 @@ module.exports = fetchSkyblockProfile;
 async function fetchSkyblockProfile(name, fruit = null) {
 
 	// fetch uuid of given MC account
-	// const uuid will have format {id: <uuid>, name: <IGN>}
-	let uuid = await api.nameToUuid(name);
-	uuid = uuid[0];
-	console.log(`fetched uuid ${uuid.id} belonging to account ${uuid.name}`);
+	// uuid will have format {id: <uuid>, name: <IGN>}
+	try {
+		let uuid = await api.nameToUuid(name);
+		uuid = uuid[0];
+		console.log(`fetched uuid ${uuid.id} belonging to account ${uuid.name}`);
 
-	// get HypixelAPI data of that player
-	const url = `https://api.hypixel.net/skyblock/profiles?key=${process.env.HYPIXEL_API_KEY}&uuid=${uuid.id}`;
-	const data = await getAPIData(url);
+		// get HypixelAPI data of that player
+		const url = `https://api.hypixel.net/skyblock/profiles?key=${process.env.HYPIXEL_API_KEY}&uuid=${uuid.id}`;
+		const data = await getAPIData(url);
 
-	// choose the right skyblock profile
-	const profileIndex = await chooseProfile(JSON.parse(data), fruit);
-	const ret = { 'profileName':JSON.parse(data)['profiles'][profileIndex]['cute_name'], 'profile': JSON.parse(data)['profiles'][profileIndex]['members'][uuid.id] };
-	console.log(`selected Profile ${ret['profileName']}`);
+		// choose the right skyblock profile
+		const profileIndex = await chooseProfile(JSON.parse(data), fruit);
+		const ret = { 'profileName':JSON.parse(data)['profiles'][profileIndex]['cute_name'], 'profile': JSON.parse(data)['profiles'][profileIndex]['members'][uuid.id] };
+		console.log(`selected Profile ${ret['profileName']}`);
 
-	return ret;
+		return ret;
+	}
+	catch (error) {
+		if (error.message[0] == '!') {
+			throw error;
+		}
+		else {
+			throw new Error(`!Couldn't find a user with the name '${name}'`);
+		}
+	}
 }
 
 async function getAPIData(url) {
-	try {
-		return await new Promise((resolve, reject) => {
-			https.get(url, (response) => {
-				let data = '';
-				response.on('data', (chunk) => {
-					data += chunk;
-				});
 
-				response.on('end', () => {
-					if (JSON.parse(data)['success'] == false) {
-						console.error(JSON.parse(data)['cause']);
-						reject(new Error('Something went wrong!'));
-					}
-					else if (JSON.parse(data)['success'] == true && JSON.parse(data)['profiles'] == null) {
-						console.error('Player hasnt played skyblock');
-						reject(new Error('That player has no Skyblock profiles'));
-					}
-					else {
-						resolve(data);
-					}
-				}).on('error', () => {
-					console.log('Error: No valid API response');
-				});
+	return await new Promise((resolve, reject) => {
+		https.get(url, (response) => {
+			let data = '';
+			response.on('data', (chunk) => {
+				data += chunk;
+			});
+
+			response.on('end', () => {
+				if (JSON.parse(data)['success'] == false) {
+					console.error(JSON.parse(data)['cause']);
+					reject(new Error('Something went wrong!'));
+				}
+				else if (JSON.parse(data)['success'] == true && JSON.parse(data)['profiles'] == null) {
+					console.error('Player hasnt played skyblock');
+					reject(new Error('!That player has no Skyblock profiles'));
+				}
+				else {
+					resolve(data);
+				}
+			}).on('error', () => {
+				console.log('Error: No valid API response');
+				throw new Error('!API doesn\'t respond');
 			});
 		});
-	}
-	catch (error) {
-		// TODO: How do I get this error to be catched in hotm.js?
-		console.log(error);
-	}
+	});
 }
 
 
 // finds the profile with name <fruit> if given, else chooses a profile based on a certain metric
-// currently it simply takes the first profile in the array
-// TODO: better metric
+// currently it simply takes the last saved profile
+// TODO: last save is going to be removed from API
 async function chooseProfile(profileData, fruit = null) {
 	let profileNumber = 0;
 

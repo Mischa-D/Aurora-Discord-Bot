@@ -22,15 +22,7 @@ module.exports = {
 		const name = interaction.options.getString('minecraft-name') || user.nickname;
 		const profileFruit = interaction.options.getString('profile-name');
 
-		let profileData;
-		try {
-			profileData = await fetchSkyblockProfile(name, profileFruit);
-
-		}
-		catch (error) {
-			console.error(error);
-			console.log(profileData);
-		}
+		const profileData = await fetchSkyblockProfile(name, profileFruit);
 
 		const skyblockXP = { 'Skills': 0, 'Bestiary/Boss Kills': 0, 'Slayer': 0, 'Dungeons': 0, 'Collections': 0, 'Minions': 0,
 			'Mining': 0, 'Magical Power': 0, 'Trophy Fishing': 0, 'Pet Score': 0, 'Fairy Souls': 0, 'Melody\'s Harp': 0,

@@ -11,8 +11,6 @@ module.exports = (client) => {
 		client.commands.set(command.data.name, command);
 	}
 
-	console.log(client.commands);
-
 	client.on('interactionCreate', async interaction => {
 		if (!interaction.isCommand()) return;
 
@@ -21,12 +19,18 @@ module.exports = (client) => {
 		if (!command) return;
 
 		try {
+			console.log('--------');
 			console.log(`User ${interaction.user.tag} used command ${interaction.commandName}`);
 			await command.execute(interaction);
 		}
 		catch (error) {
 			console.error(error);
-			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+			if (error.message[0] == '!') {
+				await interaction.reply({ content: error.message.slice(1), ephemeral: true });
+			}
+			else {
+				await interaction.reply({ content: 'Uh Oh! Something went wrong.', ephemeral: true });
+			}
 		}
 	});
 };

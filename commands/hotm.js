@@ -17,19 +17,9 @@ module.exports = {
 		const name = interaction.options.getString('minecraft-name');
 		const profileFruit = interaction.options.getString('profile-name');
 
-		let profileData;
-		try {
-			profileData = await fetchSkyblockProfile(name, profileFruit);
 
-		}
-		catch (error) {
-			console.error(error);
-			console.log(profileData);
-		}
+		const profileData = await fetchSkyblockProfile(name, profileFruit);
 
-		if (profileData == null) {
-			throw new Error('That player has never played skyblock before.');
-		}
 		const text = (profileData['profile']['mining_core']['nodes']);
 		const embed = embedTemplate();
 		embed.setTitle(`${name}'s Heart of the Mountain on profile ${profileData['profileName']}`);
