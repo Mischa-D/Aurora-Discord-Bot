@@ -1,8 +1,11 @@
 const nbt = require('nbt');
 
 async function parseItemInventoryData(itemInventory) {
-	const itemData = await parseNBTPromisified(itemInventory.data);
 	const items = [];
+	if (itemInventory == '') {
+		return items;
+	}
+	const itemData = await parseNBTPromisified(itemInventory.data);
 	// assuming all Hypixel API NBT texts have the same inner structure
 	const itemList = itemData.value.i.value.value;
 	// get relevant data for each item

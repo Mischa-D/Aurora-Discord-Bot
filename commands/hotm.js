@@ -25,11 +25,10 @@ module.exports = {
 		catch (error) {
 			console.error(error);
 			console.log(profileData);
-			await interaction.reply({ content: 'There was an error while executing this command!\n' + error.message, ephemeral: true });
 		}
 
 		if (profileData == null) {
-			interaction.reply({ content: 'That player has never played skyblock before.', ephemeral: true });
+			throw new Error('That player has never played skyblock before.');
 		}
 		const text = (profileData['profile']['mining_core']['nodes']);
 		const embed = embedTemplate();
@@ -51,6 +50,6 @@ module.exports = {
 			}
 		}
 
-		interaction.reply({ embeds: [embed] });
+		await interaction.reply({ embeds: [embed] });
 	},
 };

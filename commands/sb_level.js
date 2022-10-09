@@ -4,7 +4,9 @@ const calcXp = require('../functionsHypixelAPI/calculate-skill-level');
 const fetchSkyblockProfile = require('../functionsHypixelAPI/fetch-skyblock-profile');
 const calculatePetScore = require('../functionsHypixelAPI/calculate-pet-score');
 const getInventoryData = require('../functionsHypixelAPI/parse-nbt');
+
 const lvl50Skills = require('../databases/lvl50Skills');
+const BESTIARYBOSSES = require('../databases/bestiaryBosses');
 
 const AMOUNT_SKYBLOCK_COLLECTIONS = 67;
 
@@ -15,10 +17,9 @@ module.exports = {
 		.addStringOption(option => option.setName('minecraft-name').setDescription('your IGN'))
 		.addStringOption(option => option.setName('profile-name').setDescription('the name of your profile')),
 	async execute(interaction) {
-		// get uuid based on inputted minecraft name
-		const name = interaction.options.getString('minecraft-name');
-		// const name = 'LagopusPolar';
-		// const profileFruit = 'Apple';
+		// get uuid based on inputted minecraft name or use server nickname
+		const user = await interaction.guild.members.fetch(interaction.user);
+		const name = interaction.options.getString('minecraft-name') || user.nickname;
 		const profileFruit = interaction.options.getString('profile-name');
 
 		let profileData;
@@ -29,11 +30,11 @@ module.exports = {
 		catch (error) {
 			console.error(error);
 			console.log(profileData);
-			await interaction.reply({ content: 'There was an error while executing this command!\n' + error.message, ephemeral: true });
 		}
 
-		const skyblockXP = { 'Skills': 0, 'Slayer': 0, 'Dungeons': 0, 'Collections': 0, 'Minions': 0, 'Mining': 0,
-			'Magical Power': 0, 'Trophy Fishing': 0, 'Pet Score': 0, 'Fairy Souls': 0, 'Melody\'s Harp': 0 };
+		const skyblockXP = { 'Skills': 0, 'Bestiary/Boss Kills': 0, 'Slayer': 0, 'Dungeons': 0, 'Collections': 0, 'Minions': 0,
+			'Mining': 0, 'Magical Power': 0, 'Trophy Fishing': 0, 'Pet Score': 0, 'Fairy Souls': 0, 'Melody\'s Harp': 0,
+			'Dojo': 0 };
 
 
 		/** ################### SKILLS ################################# */
@@ -60,6 +61,65 @@ module.exports = {
 				skyblockXP['Skills'] += skillLevel * 5;
 			}
 		});
+
+
+		/** ################### BESTIARY ################################# */
+		let bestiaryTiers = 0;
+		Object.keys(profileData.profile.bestiary).forEach(entry => {
+			const entryTags = entry.split('_');
+			// + 1 level for every 100,000 kills over 100,000
+			const KillsPerLevel = [10, 15, 75, 150, 250, 500, 1500, 2500, 5000, 15000, 25000, 50000];
+
+			// + 1 level for every 100 kills over 200
+			const bossKillsPerLevel = [2, 3, 5, 10, 10, 10, 10, 25, 25, 50, 50];
+
+			// check if entry is single entry or family
+			if (entryTags[0] == 'kills' && entryTags[1] == 'family') {
+				let kills = profileData.profile.bestiary[entry];
+				let startLinScaling = 100000;
+				let linScaling = 100000;
+				let levelSheet = KillsPerLevel;
+
+				// determine if entry is boss entry, use different parameters
+				if (BESTIARYBOSSES.includes(entryTags.slice(2).join('_'))) {
+					startLinScaling = 200;
+					linScaling = 100;
+					levelSheet = bossKillsPerLevel;
+				}
+				// bestiary level cap for private island mobs
+				else if (['zombie', 'skeleton', 'spider', 'slime', 'witch', 'enderman_private'].includes(entryTags.slice(2).join('_'))) {
+					kills = Math.min(kills, 500);
+				}
+				bestiaryTiers += Math.floor(Math.max(kills - startLinScaling, 0) / linScaling) +
+				calcXp(Math.min(kills, startLinScaling), levelSheet);
+			}
+
+			// check if entry is arachne or dragon type kills
+			else if (entryTags[0] == 'kills') {
+				if (entryTags[1] == 'arachne') {
+					if (entryTags[2] == '500') {
+						skyblockXP['Bestiary/Boss Kills'] += 40;
+					}
+					else if (entryTags[2] == '300') {
+						skyblockXP['Bestiary/Boss Kills'] += 20;
+					}
+				}
+				else if (entryTags[2] == 'dragon') {
+					if (entryTags[1] == 'superior') {
+						skyblockXP['Bestiary/Boss Kills'] += 50;
+					}
+					else {
+						skyblockXP['Bestiary/Boss Kills'] += 25;
+					}
+				}
+			}
+		});
+		skyblockXP['Bestiary/Boss Kills'] += bestiaryTiers + Math.floor(bestiaryTiers / 10) * 2;
+
+		// KUUDRA
+		for (let i = 0; i < Object.keys(profileData.profile.nether_island_player_data.kuudra_completed_tiers).length; i++) {
+			skyblockXP['Bestiary/Boss Kills'] += (i + 1) * 20;
+		}
 
 
 		/** ################### SLAYER ################################# */
@@ -114,10 +174,10 @@ module.exports = {
 		const milestonesMid = [50, 50, 50, 100, 150, 600];
 		const milestonesHigh = [50, 50, 50, 100, 250, 250, 250];
 		// accumulate completions from catacombs and master mode
-		for (let i = 1; i < Object.keys(dungeonData.dungeon_types.catacombs.milestone_completions).length || 0; i++) {
+		for (let i = 1; i < Object.keys(dungeonData.dungeon_types.catacombs.milestone_completions || {}).length; i++) {
 			milestone_completions.push(dungeonData.dungeon_types.catacombs.milestone_completions[i]);
 		}
-		for (let j = 0; j < Object.keys(dungeonData.dungeon_types.master_catacombs.milestone_completions).length || 0; j++) {
+		for (let j = 0; j < Object.keys(dungeonData.dungeon_types.master_catacombs.milestone_completions || {}).length; j++) {
 			milestone_completions[j] += dungeonData.dungeon_types.master_catacombs.milestone_completions[j + 1];
 		}
 		// check which milestones were reached and add xp
@@ -126,12 +186,19 @@ module.exports = {
 			skyblockXP['Dungeons'] += Math.min(milestone, 3) * 15 + Math.max(milestone - 3, 0) * 25;
 		}
 		/** ################### MINING ################################ */
+		// hotm level
 		const miningData = profileData.profile.mining_core;
-		const xpPerHotmLevel = [35, 45, 60, 75, 90, 110, 130];
+		const xpAtHotmLevel = [35, 80, 140, 215, 305, 415, 545];
 		const hotmXpPerLevel = require('../databases/hotmExpPerLevel');
 		const hotmLevel = calcXp(miningData.experience, hotmXpPerLevel);
-		for (let k = 0; k < hotmLevel; k++) {
-			skyblockXP['Mining'] += xpPerHotmLevel[k];
+		skyblockXP['Mining'] += xpAtHotmLevel[hotmLevel - 1];
+
+		// commission milestones
+		let i = 1;
+		const xpPerCommissionMilestone = [20, 30, 30, 50, 50, 75];
+		while (profileData.profile.tutorial.includes(`commission_milestone_reward_skyblock_xp_tier_${i}`)) {
+			skyblockXP['Mining'] += xpPerCommissionMilestone[i - 1];
+			i++;
 		}
 
 
@@ -153,7 +220,7 @@ module.exports = {
 
 
 		/** ################### Magical Power ########################## */
-		const accessories = await getInventoryData(profileData.profile.talisman_bag);
+		const accessories = await getInventoryData(profileData.profile.talisman_bag || '');
 		accessories.forEach(accessory => {
 			let mp = 0;
 			switch (accessory.rarity) {
@@ -222,7 +289,7 @@ module.exports = {
 		/** ################### MELODY'S HARP ############################# */
 		let perfect_scores = 0;
 		const xpPerSong = [5, 5, 5, 10, 10, 10, 15, 15, 15, 25, 25, 35, 35];
-		Object.keys(profileData.profile.harp_quest).forEach(song_stat => {
+		Object.keys(profileData.profile.harp_quest || {}).forEach(song_stat => {
 			const temp = song_stat.split('_');
 			// check for entries of type "song_<song_name>_perfect_completions",
 			// since value always > 0
@@ -231,16 +298,26 @@ module.exports = {
 			}
 		});
 		let sum = 0;
-		for (let i = 0; i < perfect_scores; i++) {
-			sum += xpPerSong[i];
+		for (let l = 0; l < perfect_scores; l++) {
+			sum += xpPerSong[l];
 		}
 		skyblockXP['Melody\'s Harp'] += sum;
+
+
+		/** ################### DOJO ############################# */
+		Object.keys(profileData.profile.nether_island_player_data.dojo).forEach(challengeStat => {
+			// filter for challenge points
+			if (challengeStat.split('_')[1] == 'points') {
+				const points = Math.min(profileData.profile.nether_island_player_data.dojo[challengeStat], 1000);
+				skyblockXP['Dojo'] += Math.floor(points / 200) * 10;
+			}
+		});
 
 
 		// output
 		const embed = createEmbedTemplate();
 		embed.setTitle(`${name}'s minimum SkyBlock Level on ${profileData.profileName}`);
-		embed.setDescription('Calculations dont include: Bestiary, Museum, Bank upgrades, comission milestones, dragons slain, dojo, kuudra and arachne tiers');
+		embed.setDescription('Calculations dont include: Museum, Bank upgrades and powder');
 
 
 		let totalXP = 0;
@@ -250,6 +327,6 @@ module.exports = {
 		});
 		embed.addField(`\`Total SkyBlock Level: ${totalXP / 100}\``, '\u200B');
 
-		interaction.reply({ embeds: [embed] });
+		await interaction.reply({ embeds: [embed] });
 	},
 };

@@ -15,7 +15,6 @@ async function fetchSkyblockProfile(name, fruit = null) {
 	// fetch uuid of given MC account
 	// const uuid will have format {id: <uuid>, name: <IGN>}
 	let uuid = await api.nameToUuid(name);
-	console.log(uuid);
 	uuid = uuid[0];
 	console.log(`fetched uuid ${uuid.id} belonging to account ${uuid.name}`);
 
@@ -26,7 +25,7 @@ async function fetchSkyblockProfile(name, fruit = null) {
 	// choose the right skyblock profile
 	const profileIndex = await chooseProfile(JSON.parse(data), fruit);
 	const ret = { 'profileName':JSON.parse(data)['profiles'][profileIndex]['cute_name'], 'profile': JSON.parse(data)['profiles'][profileIndex]['members'][uuid.id] };
-	console.log(ret['profileName']);
+	console.log(`selected Profile ${ret['profileName']}`);
 
 	return ret;
 }

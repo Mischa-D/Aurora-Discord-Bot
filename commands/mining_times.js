@@ -26,12 +26,12 @@ module.exports = {
 		});
 		child_python.on('close', (code) => {
 			if (code == 6) {
-				interaction.reply(`Couldn't find a block with that name!\n 
+				throw new Error(`Couldn't find a block with that name!\n 
 				Make sure you spelled it correctly and try filling out 
 				spaces with underscores.`);
 			}
 			else if (code != 0) {
-				interaction.reply('Uh oh! Something went wrong.');
+				throw new Error('Uh oh! Something went wrong.');
 			}
 		});
 	},

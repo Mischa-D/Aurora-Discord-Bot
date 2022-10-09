@@ -22,6 +22,6 @@ module.exports = {
 			embed.addField(`/${command.data.name} ${title}`, `${command.data.description}`);
 		}
 
-		interaction.reply({ embeds: [embed] });
+		await interaction.reply({ embeds: [embed] });
 	},
 };
