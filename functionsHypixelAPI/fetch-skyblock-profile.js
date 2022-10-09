@@ -10,7 +10,11 @@ module.exports = fetchSkyblockProfile;
 
 // returns a specific or chosen by choose-profile.js profile of the inputted player in the form
 // {'profileName': <profile name>, 'profile': <data of the requested player on that profile>}
-async function fetchSkyblockProfile(name, fruit = null) {
+async function fetchSkyblockProfile(interaction) {
+	// use inputted name or discord nickname if not provided
+	const user = await interaction.guild.members.fetch(interaction.user);
+	const name = interaction.options.getString('minecraft-name') || user.nickname;
+	const fruit = interaction.options.getString('profile-name') || null;
 
 	// fetch uuid of given MC account
 	// uuid will have format {id: <uuid>, name: <IGN>}
@@ -25,7 +29,7 @@ async function fetchSkyblockProfile(name, fruit = null) {
 
 		// choose the right skyblock profile
 		const profileIndex = await chooseProfile(JSON.parse(data), fruit);
-		const ret = { 'profileName':JSON.parse(data)['profiles'][profileIndex]['cute_name'], 'profile': JSON.parse(data)['profiles'][profileIndex]['members'][uuid.id] };
+		const ret = { 'userName': name, 'profileName':JSON.parse(data)['profiles'][profileIndex]['cute_name'], 'profile': JSON.parse(data)['profiles'][profileIndex]['members'][uuid.id] };
 		console.log(`selected Profile ${ret['profileName']}`);
 
 		return ret;

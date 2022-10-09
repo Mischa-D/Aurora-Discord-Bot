@@ -17,12 +17,7 @@ module.exports = {
 		.addStringOption(option => option.setName('minecraft-name').setDescription('your IGN'))
 		.addStringOption(option => option.setName('profile-name').setDescription('the name of your profile')),
 	async execute(interaction) {
-		// get uuid based on inputted minecraft name or use server nickname
-		const user = await interaction.guild.members.fetch(interaction.user);
-		const name = interaction.options.getString('minecraft-name') || user.nickname;
-		const profileFruit = interaction.options.getString('profile-name');
-
-		const profileData = await fetchSkyblockProfile(name, profileFruit);
+		const profileData = await fetchSkyblockProfile(interaction);
 
 		const skyblockXP = { 'Skills': 0, 'Bestiary/Boss Kills': 0, 'Slayer': 0, 'Dungeons': 0, 'Collections': 0, 'Minions': 0,
 			'Mining': 0, 'Magical Power': 0, 'Trophy Fishing': 0, 'Pet Score': 0, 'Fairy Souls': 0, 'Melody\'s Harp': 0,
@@ -308,7 +303,7 @@ module.exports = {
 
 		// output
 		const embed = createEmbedTemplate();
-		embed.setTitle(`${name}'s minimum SkyBlock Level on ${profileData.profileName}`);
+		embed.setTitle(`${profileData.userName}'s minimum SkyBlock Level on ${profileData.profileName}`);
 		embed.setDescription('Calculations dont include: Museum, Bank upgrades and powder');
 
 

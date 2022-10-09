@@ -13,16 +13,11 @@ module.exports = {
 		.addStringOption(option => option.setName('minecraft-name').setDescription('your IGN'))
 		.addStringOption(option => option.setName('profile-name').setDescription('the name of your profile')),
 	async execute(interaction) {
-		// get uuid based on inputted minecraft name
-		const name = interaction.options.getString('minecraft-name');
-		const profileFruit = interaction.options.getString('profile-name');
-
-
-		const profileData = await fetchSkyblockProfile(name, profileFruit);
+		const profileData = await fetchSkyblockProfile(interaction);
 
 		const text = (profileData['profile']['mining_core']['nodes']);
 		const embed = embedTemplate();
-		embed.setTitle(`${name}'s Heart of the Mountain on profile ${profileData['profileName']}`);
+		embed.setTitle(`${profileData.userName}'s Heart of the Mountain on profile ${profileData['profileName']}`);
 		embed.setDescription('as a worse version of the /mining command of the skyhelper bot this will not be a final feature. It rather serves as a first test command for using the Hypixel skyblock API.');
 		let perks = '';
 		try {
