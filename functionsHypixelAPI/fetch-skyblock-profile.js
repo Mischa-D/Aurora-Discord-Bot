@@ -28,7 +28,7 @@ async function fetchSkyblockProfile(interaction) {
 		const data = await getAPIData(url);
 
 		// choose the right skyblock profile
-		const profileIndex = await chooseProfile(JSON.parse(data), fruit);
+		const profileIndex = await chooseProfile(JSON.parse(data), uuid.id, fruit);
 		const ret = { 'userName': name, 'profileName':JSON.parse(data)['profiles'][profileIndex]['cute_name'], 'profile': JSON.parse(data)['profiles'][profileIndex]['members'][uuid.id] };
 		console.log(`selected Profile ${ret['profileName']}`);
 
@@ -39,6 +39,7 @@ async function fetchSkyblockProfile(interaction) {
 			throw error;
 		}
 		else {
+			console.error(error);
 			throw new Error(`!Couldn't find a user with the name '${name}'`);
 		}
 	}
@@ -75,15 +76,25 @@ async function getAPIData(url) {
 
 
 // finds the profile with name <fruit> if given, else chooses a profile based on a certain metric
-// currently it simply takes the last saved profile
-// TODO: last save is going to be removed from API
-async function chooseProfile(profileData, fruit = null) {
+// get profile with highest skill xp sum
+async function chooseProfile(profileData, player, fruit = null) {
 	let profileNumber = 0;
 
 	for (const [index, profile] of profileData['profiles'].entries()) {
 		if (typeof fruit === 'string' && profile['cute_name'].toUpperCase() != fruit.toUpperCase()) continue;
-		else if (typeof fruit === typeof null && profile['last_save'] < profileData['profiles'][profileNumber]['last_save']) continue;
+		else if (!(await moarSkillz(profile.members[player], profileData['profiles'][profileNumber].members[player]))) continue;
 		profileNumber = index;
 	}
 	return profileNumber;
+}
+
+// return true if <compare> has more total skill xp than <previousBest>
+async function moarSkillz(compare, previousBest) {
+	let compareValue = 0;
+	const skills = ['farming', 'mining', 'combat', 'foraging', 'fishing', 'enchanting', 'alchemy', 'carpentry', 'taming'];
+	skills.forEach(element => {
+		const skill = 'experience_skill_' + element;
+		compareValue += compare[skill] || 0 - previousBest[skill] || 0;
+	});
+	return compareValue > 0;
 }

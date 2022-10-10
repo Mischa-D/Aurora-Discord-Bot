@@ -104,7 +104,8 @@ module.exports = {
 		skyblockXP['Bestiary/Boss Kills'] += bestiaryTiers + Math.floor(bestiaryTiers / 10) * 2;
 
 		// KUUDRA
-		for (let i = 0; i < Object.keys(profileData.profile.nether_island_player_data.kuudra_completed_tiers).length; i++) {
+		const netherData = profileData.profile.nether_island_player_data || {};
+		for (let i = 0; i < Object.keys(netherData.kuudra_completed_tiers || {}).length; i++) {
 			skyblockXP['Bestiary/Boss Kills'] += (i + 1) * 20;
 		}
 
@@ -177,8 +178,8 @@ module.exports = {
 		const miningData = profileData.profile.mining_core;
 		const xpAtHotmLevel = [35, 80, 140, 215, 305, 415, 545];
 		const hotmXpPerLevel = require('../databases/hotmExpPerLevel');
-		const hotmLevel = calcXp(miningData.experience, hotmXpPerLevel);
-		skyblockXP['Mining'] += xpAtHotmLevel[hotmLevel - 1];
+		const hotmLevel = miningData.experience ? calcXp(miningData.experience, hotmXpPerLevel) : 0;
+		skyblockXP['Mining'] += xpAtHotmLevel[hotmLevel - 1] || 0;
 
 		// commission milestones
 		let i = 1;
@@ -292,7 +293,7 @@ module.exports = {
 
 
 		/** ################### DOJO ############################# */
-		Object.keys(profileData.profile.nether_island_player_data.dojo).forEach(challengeStat => {
+		Object.keys(netherData.dojo || {}).forEach(challengeStat => {
 			// filter for challenge points
 			if (challengeStat.split('_')[1] == 'points') {
 				const points = Math.min(profileData.profile.nether_island_player_data.dojo[challengeStat], 1000);
@@ -308,9 +309,11 @@ module.exports = {
 
 
 		let totalXP = 0;
-		Object.keys(skyblockXP).forEach(xpCriteria => {
-			embed.addField(`SkyBlock Level from ${xpCriteria}`, `${skyblockXP[xpCriteria] / 100}`);
-			totalXP += skyblockXP[xpCriteria];
+		const skyblockXPArray = Object.entries(skyblockXP);
+		skyblockXPArray.sort((a, b) => b[1] - a[1]);
+		skyblockXPArray.forEach(xpCriteria => {
+			embed.addField(`SkyBlock Level from ${xpCriteria[0]}`, `${xpCriteria[1] / 100}`);
+			totalXP += xpCriteria[1];
 		});
 		embed.addField(`\`Total SkyBlock Level: ${totalXP / 100}\``, '\u200B');
 
