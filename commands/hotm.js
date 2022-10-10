@@ -4,6 +4,8 @@ const dotenv = require('dotenv');
 const embedTemplate = require('../create-embed-template');
 const fetchSkyblockProfile = require('../functionsHypixelAPI/fetch-skyblock-profile');
 
+const getMiningStats = require('../functionsHypixelAPI/calculate-mining-stats');
+
 dotenv.config();
 
 module.exports = {
@@ -14,6 +16,8 @@ module.exports = {
 		.addStringOption(option => option.setName('profile-name').setDescription('the name of your profile')),
 	async execute(interaction) {
 		const profileData = await fetchSkyblockProfile(interaction);
+
+		const stats = getMiningStats(profileData);
 
 		const text = (profileData['profile']['mining_core']['nodes']);
 		const embed = embedTemplate();
@@ -34,6 +38,8 @@ module.exports = {
 				console.error(err);
 			}
 		}
+		embed.addField('Stats', `${JSON.stringify(await stats)}`);
+
 
 		await interaction.reply({ embeds: [embed] });
 	},

@@ -1,23 +1,37 @@
 const nbt = require('nbt');
 
-async function parseItemInventoryData(itemInventory) {
+async function parseItemInventoryData(itemInventory, filter = async (item) => item.id.length != 0) {
 	const items = [];
-	if (itemInventory == '') {
+	if (itemInventory == {}) {
 		return items;
 	}
 	const itemData = await parseNBTPromisified(itemInventory.data);
 	// assuming all Hypixel API NBT texts have the same inner structure
 	const itemList = itemData.value.i.value.value;
 	// get relevant data for each item
-	itemList.forEach(item => {
+	await itemList.forEach(async item => {
 		if (typeof item.tag != 'undefined') {
-			let itemRarity = item.tag.value.display.value.Lore.value.value.pop().replace(/\u00A7[0-9A-FK-OR]/ig, '').split(' ');
+			let itemRarity;
+			let itemType;
+			const itemTag = item.tag.value.display.value.Lore.value.value.pop().replace(/\u00A7[0-9A-FK-OR]/ig, '').split(' ');
+			const recombed = itemTag[0] == 'a';
 			// recombed items will have a tag in the form of <a <rarity> <item type> a> left
-			itemRarity[0] == 'a' ? itemRarity = itemRarity[1] : itemRarity = itemRarity[0];
+			if (recombed) {
+				itemRarity = itemTag[1];
+				itemType = itemTag.slice(2, -1).join(' ');
+			}
+			else {
+				itemRarity = itemTag[0];
+				itemType = itemTag.slice(1).join(' ');
+			}
 			item.tag.value.display.value.Lore.value.value.pop();
 			const itemLore = item.tag.value.display.value.Lore.value.value.join('\n').replace(/\u00A7[0-9A-FK-OR]/ig, '');
 			const itemID = item.tag.value.ExtraAttributes.value.id.value;
-			items.push({ id: itemID, rarity: itemRarity, lore: itemLore });
+			const newItem = { id: itemID, rarity: itemRarity, type: itemType, lore: itemLore };
+
+			if (await filter(newItem)) {
+				items.push(newItem);
+			}
 		}
 	});
 	return items;

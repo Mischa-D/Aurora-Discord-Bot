@@ -8,7 +8,6 @@ const getInventoryData = require('../functionsHypixelAPI/parse-nbt');
 const lvl50Skills = require('../databases/lvl50Skills');
 const BESTIARYBOSSES = require('../databases/bestiaryBosses');
 const MAXSBXP = require('../databases/maxSbXPvalues');
-const maxSbXp = require('../databases/maxSbXPvalues');
 
 const AMOUNT_SKYBLOCK_COLLECTIONS = 67;
 
@@ -210,7 +209,7 @@ module.exports = {
 
 
 		/** ################### Magical Power ########################## */
-		const accessories = await getInventoryData(profileData.profile.talisman_bag || '');
+		const accessories = await getInventoryData(profileData.profile.talisman_bag || {});
 		accessories.forEach(accessory => {
 			let mp = 0;
 			switch (accessory.rarity) {
@@ -314,7 +313,7 @@ module.exports = {
 		const skyblockXPArray = Object.entries(skyblockXP);
 		skyblockXPArray.sort((a, b) => b[1] - a[1]);
 		skyblockXPArray.forEach(xpCriteria => {
-			embed.addField(`SkyBlock Level from ${xpCriteria[0]}`, `${xpCriteria[1] / 100} / ${maxSbXp[xpCriteria[0]] / 100} `);
+			embed.addField(`SkyBlock Level from ${xpCriteria[0]}`, `${xpCriteria[1] / 100} / ${MAXSBXP[xpCriteria[0]] / 100} `);
 			totalXP += xpCriteria[1];
 		});
 		embed.addField(`\`Total SkyBlock Level: ${totalXP / 100}\``, '\u200B');

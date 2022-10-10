@@ -9,7 +9,7 @@ dotenv.config();
 module.exports = fetchSkyblockProfile;
 
 // returns a specific or chosen by choose-profile.js profile of the inputted player in the form
-// {'profileName': <profile name>, 'profile': <data of the requested player on that profile>}
+// {'userName': <player Name>, 'profileName': <profile name>, 'profile': <data of the requested player on that profile>}
 async function fetchSkyblockProfile(interaction) {
 	// use inputted name or discord nickname if not provided
 	const user = await interaction.guild.members.fetch(interaction.user);
