@@ -1,30 +1,21 @@
 const calcXp = require('./calculate-skill-level');
 const getInventoryData = require('../functionsHypixelAPI/parse-nbt');
 const getStats = require('../functionsHypixelAPI/getStatsFromLore');
+const petXpPerLevel = require('../databases/petExpPerLevel');
 
-async function getMiningStats(profileData) {
+async function getMiningStats(profileData, bal = false) {
 	console.log('accumulating mining stats...');
 	let speed = 0;
 	let fortune = 0;
 	let pristine = 0;
 
-	// get mining fortune from mining level
-	const miningLevel = calcXp(profileData['profile']['experience_skill_mining']);
-	fortune += miningLevel * 4;
-
-	// get hotm mining stats
-	const hotmData = profileData['profile']['mining_core']['nodes'];
-	fortune += sumStatsHotm('fortune', hotmData);
-	speed += sumStatsHotm('speed', hotmData);
-
 	// sum mining stats of best mining gear in posession
 	const bestGear = await findBestMiningGear(profileData);
 	Object.keys(bestGear).forEach(itemType => {
-		if (bestGear[itemType] != {}) {
-			fortune += bestGear[itemType].stats['Mining Fortune'];
-			speed += bestGear[itemType].stats['Mining Speed'];
-			pristine += bestGear[itemType].stats['Pristine'];
-		}
+		const bestGearStats = bestGear[itemType].stats || { 'Mining Fortune': 0, 'Mining Speed': 0, 'Pristine': 0 };
+		fortune += bestGearStats['Mining Fortune'];
+		speed += bestGearStats['Mining Speed'];
+		pristine += bestGearStats['Pristine'];
 	});
 
 	// get mining related accessories
@@ -61,15 +52,87 @@ async function getMiningStats(profileData) {
 			stats = getStats(accessory);
 		}
 	});
-	stats = await stats;
+	stats = await stats || { 'Mining Fortune': 0, 'Mining Speed': 0, 'Pristine': 0 };
 	speed += stats['Mining Speed'] || 0;
 	fortune += stats['Mining Fortune'] || 0;
 	pristine += stats['Pristine'] || 0;
 
+	// get mining stats from potions/temporary effects
+	if ((profileData.profile.temp_stat_buffs || []).filter(cake => cake.key == 'cake_mining_fortune')) fortune += 5;
+
+	const spelunker = profileData.profile.active_effects.filter(effect => effect.effect == 'spelunker');
+	const haste = profileData.profile.active_effects.filter(effect => effect.effect == 'haste');
+	fortune += spelunker.length > 0 ? spelunker[0].level * 5 : 0;
+	speed += haste.length > 0 ? haste[0].level * 50 : 0;
+
+	// get mining fortune from mining level
+	const miningLevel = calcXp(profileData['profile']['experience_skill_mining']);
+	fortune += miningLevel * 4;
+
+	// get mining stats from pet
+	const petType = bal ? 'BAL' : 'SCATHA';
+	const petSelection = profileData.profile.pets.filter(pet => pet.type == petType);
+	// find best pet of specified type
+	const petStats = { 'Mining Speed': 0, 'Mining Fortune': 0, 'Level': 0 };
+	petSelection.forEach(pet => {
+		// for bal pets only legendary tier is relevant
+		if (bal) {
+			if (pet.tier == 'LEGENDARY') {
+				petStats.Level = Math.max(petXpPerLevel['LEGENDARY'], petStats.Level);
+				if (pet.heldItem == 'PET_ITEM_QUICK_CLAW') {
+					petStats['Mining Speed'] = Math.floor(petStats.Level / 2);
+					petStats['Mining Fortune'] = Math.floor(petStats.Level / 2);
+				}
+			}
+		}
+		// find best rarity pet for scathas
+		else {
+			let score;
+			switch (pet.tier) {
+			case 'RARE':
+				score = 3;
+				break;
+			case 'EPIC':
+				score = 4;
+				break;
+			case 'LEGENDARY':
+				score = 5;
+				break;
+
+			default:
+				break;
+			}
+			const level = calcXp(pet.exp, petXpPerLevel[Object.keys(petXpPerLevel)[score - 1]]);
+			let petSpeed = level;
+			let petFortune = level * (score > 3 ? 1.25 : 1);
+			// check for quick claw
+			if (pet.heldItem == 'PET_ITEM_QUICK_CLAW') {
+				petSpeed += Math.floor(level / 2);
+				petFortune += Math.floor(level / 2);
+			}
+			petStats['Mining Speed'] = Math.max(petSpeed, petStats['Mining Speed']);
+			petStats['Mining Fortune'] = Math.max(petFortune, petStats['Mining Fortune']);
+		}
+	});
+	speed += petStats['Mining Speed'];
+	fortune += petStats['Mining Fortune'];
+
+	if (bal) {
+		speed *= petStats.Level * 0.15;
+		fortune *= petStats.Level * 0.15;
+	}
+
+
+	// get hotm mining stats
+	const hotmData = profileData['profile']['mining_core']['nodes'];
+	fortune += sumStatsHotm('fortune', hotmData);
+	speed += sumStatsHotm('speed', hotmData);
+
 	console.log('stats calculated:', speed, fortune, pristine);
 
-	return { 'Mining speed': speed, 'Mining fortune': fortune, 'Pristine': pristine };
+	return { 'Mining Speed': speed, 'Mining Fortune': fortune, 'Pristine': pristine };
 }
+
 
 // summarizes the gained stats from HotM of one mining stat (for asnchronous execution of all 3 at the same time ig??)
 // TODO: Look at situational perks (professional/gemstones will be default, skymall can be included)
@@ -119,6 +182,7 @@ async function findBestMiningGear(profileData) {
 	});
 	inventories.push(... await getInventoryData(profileData.profile.personal_vault_contents || {}, isMiningGear));
 	inventories.push(...await getInventoryData(profileData.profile.wardrobe_contents, isMiningGear));
+	inventories.push(...await getInventoryData(profileData.profile.inv_armor, isMiningGear));
 	inventories.push(...await getInventoryData(profileData.profile.equippment_contents, isMiningGear));
 
 

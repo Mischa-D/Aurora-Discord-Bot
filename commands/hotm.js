@@ -17,7 +17,7 @@ module.exports = {
 	async execute(interaction) {
 		const profileData = await fetchSkyblockProfile(interaction);
 
-		const stats = getMiningStats(profileData);
+		let stats = getMiningStats(profileData);
 
 		const text = (profileData['profile']['mining_core']['nodes']);
 		const embed = embedTemplate();
@@ -38,7 +38,9 @@ module.exports = {
 				console.error(err);
 			}
 		}
-		embed.addField('Stats', `${JSON.stringify(await stats)}`);
+		stats = await stats;
+		console.log(stats);
+		embed.addField('Stats', `Mining speed: ${stats['Mining Speed']}, Mining fortune: ${stats['Mining Fortune']}, Pristine: ${stats['Pristine']}`);
 
 
 		await interaction.reply({ embeds: [embed] });
