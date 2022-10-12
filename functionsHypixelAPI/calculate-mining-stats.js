@@ -27,7 +27,46 @@ async function getMiningStats(profileData) {
 		}
 	});
 
-	console.log(speed, fortune, pristine);
+	// get mining related accessories
+	// HACK: Counts duplicate accessories
+	const miningAccessories = await getInventoryData(profileData.profile.talisman_bag || {}, (item) => ['JUNGLE', 'TITANIUM', 'POWER', 'MINERAL'].includes(item.id.split('_')[0]));
+	let stats;
+	miningAccessories.forEach(accessory => {
+		if (accessory.id.split('_')[0] == 'JUNGLE') {
+			fortune += 10;
+		}
+		else if (accessory.id.split('_')[0] == 'TITANIUM') {
+			switch (accessory.id.split('_')[1]) {
+			case 'TALISMAN':
+				speed += 15;
+				break;
+			case 'RING':
+				speed += 30;
+				break;
+			case 'ARTIFACT':
+				speed += 45;
+				break;
+			case 'RELIC':
+				speed += 60;
+				break;
+
+			default:
+				break;
+			}
+		}
+		else if (accessory.id == 'MINERAL_TALISMAN') {
+			fortune += 3;
+		}
+		else {
+			stats = getStats(accessory);
+		}
+	});
+	stats = await stats;
+	speed += stats['Mining Speed'] || 0;
+	fortune += stats['Mining Fortune'] || 0;
+	pristine += stats['Pristine'] || 0;
+
+	console.log('stats calculated:', speed, fortune, pristine);
 
 	return { 'Mining speed': speed, 'Mining fortune': fortune, 'Pristine': pristine };
 }
