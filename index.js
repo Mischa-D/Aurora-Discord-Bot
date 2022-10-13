@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const client = new Discord.Client({
-	intents: ['GUILDS', 'GUILD_MESSAGES'],
+	intents: ['Guilds', 'GuildMessages'],
 });
 
 

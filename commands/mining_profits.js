@@ -1,20 +1,62 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
+const { SlashCommandBuilder } = require('discord.js');
 const createEmbedTemplate = require('../create-embed-template');
+const fetchProfile = require('../functionsHypixelAPI/fetch-skyblock-profile');
+const calcStats = require('../functionsHypixelAPI/calculate-mining-stats');
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('mining_profits')
 		.setDescription('calculates how much you would earn per hour from NPC selling gemstones under optimal conditions')
-		.addIntegerOption(option => option.setName('mining_speed').setDescription('mining speed shown in your stats + professional').setRequired(true))
-		.addIntegerOption(option => option.setName('mining_fortune').setDescription('mining fortune shown in your stats + jungle amulet and fortunate').setRequired(true))
-		.addNumberOption(option => option.setName('pristine').setDescription('pristine as shown in your stats').setRequired(true)),
-	async execute(interaction) {
-		// should be replaced by variable values later, (value of jade for testing)
-		const block_hardness = 3200;
-		const pristine = interaction.options.getNumber('pristine');
-		const mining_speed = interaction.options.getInteger('mining_speed');
-		const mining_fortune = interaction.options.getInteger('mining_fortune');
+		.addSubcommand(subcommand => subcommand.setName('profile').setDescription('automatically fetch mining stats')
+			.addStringOption(option => option.setName('name').setDescription('your IGN'))
+			.addStringOption(option => option.setName('profile').setDescription('the name of your profile'))
+			.addBooleanOption(option => option.setName('bal').setDescription('specify if you want to use bal, else scatha will be used'))
+			.addIntegerOption(option => option.setName('block').setDescription('type of gemstone you want to mine')
+				.addChoices(
+					{ name: 'Ruby', value: 2500 },
+					{ name: 'Jade', value: 3200 },
+					{ name: 'Sapphire', value: 3200 },
+					{ name: 'Amethyst', value: 3200 },
+					{ name: 'Amber', value: 3200 },
+					{ name: 'Topaz', value: 4000 },
+					{ name: 'Opal', value: 4000 },
+					{ name: 'Jasper', value: 5000 },
+				)))
+		.addSubcommand(subcommand => subcommand.setName('manual').setDescription('put in mining stats yourself')
+			.addIntegerOption(option => option.setName('speed').setDescription('mining speed shown in your stats + professional').setRequired(true))
+			.addIntegerOption(option => option.setName('fortune').setDescription('mining fortune shown in your stats + jungle amulet and fortunate').setRequired(true))
+			.addNumberOption(option => option.setName('pristine').setDescription('pristine as shown in your stats').setRequired(true))
+			.addIntegerOption(option => option.setName('block').setDescription('type of gemstone you want to mine')
+				.addChoices(
+					{ name: 'Ruby', value: 2500 },
+					{ name: 'Jade', value: 3200 },
+					{ name: 'Sapphire', value: 3200 },
+					{ name: 'Amethyst', value: 3200 },
+					{ name: 'Amber', value: 3200 },
+					{ name: 'Topaz', value: 4000 },
+					{ name: 'Opal', value: 4000 },
+					{ name: 'Jasper', value: 5000 },
+				))),
 
+	async execute(interaction) {
+		let mining_speed;
+		let mining_fortune;
+		let pristine;
+		if (interaction.options.getSubcommand() == 'profile') {
+			const profileData = await fetchProfile(interaction);
+			const stats = await calcStats(profileData, interaction.options.getBoolean('bal') || false);
+			mining_speed = stats['Mining Speed'];
+			mining_fortune = stats['Mining Fortune'];
+			pristine = stats['Pristine'];
+		}
+		else {
+			// should be replaced by variable values later, (value of jade for testing)
+			pristine = interaction.options.getNumber('pristine');
+			mining_speed = interaction.options.getInteger('speed');
+			mining_fortune = interaction.options.getInteger('fortune');
+		}
+
+		const block_hardness = 3200;
 		// calculate ticks needed per block with respect to the softcap of 4 ticks
 		// TODO: instabreaking
 		let ticks_per_block = Math.max(block_hardness * 30 / mining_speed, 4);
@@ -37,12 +79,13 @@ module.exports = {
 		embed.setDescription('This doesnt work with instabreaking yet, values represent jade (or other gemstones with the same breaking power) when sold to NPC\n');
 
 		let text = '';
-		text += `\t - mine ${blocks} blocks\n`;
-		text += `\t - assuming the average base drop from blocks is 4.5: have ${blocks * 4.5} chances to activate Pristine\n`;
-		text += `\t - get ${(fortune_drops / (80 * 80)).toFixed(1)} Fine Gemstones if there was no Pristine\n`;
-		text += `\t - get ${(pristine_drops / (80 * 80)).toFixed(1)} Fine Gemstones from Pristine alone\n`;
-		text += `\t - get a total of ${(total / (80 * 80)).toFixed(1)} Fine Gemstones\n\n`;
+		text += `\t - mine \`${blocks}\` blocks\n`;
+		text += `\t - assuming the average base drop from blocks is 4.5: have \`${blocks * 4.5}\` chances to activate Pristine\n`;
+		text += `\t - get \`${(fortune_drops / (80 * 80)).toFixed(1)}\` Fine Gemstones if there was no Pristine\n`;
+		text += `\t - get \`${(pristine_drops / (80 * 80)).toFixed(1)}\` Fine Gemstones from Pristine alone\n`;
+		text += `\t - get a total of \`${(total / (80 * 80)).toFixed(1)}\` Fine Gemstones\n\n`;
 		embed.addFields(
+			{ name: 'Stats', value: `Mining speed  \`${mining_speed}\`\nMining fortune \`${mining_fortune}\`\nPristine       \`${pristine}\`` },
 			{ name: 'In 1h you could:', value: text },
 			{ name: `**worth ${(total * 0.0192 / (80 * 80)).toFixed(2)}M when sold to the NPC!**`, value: '\u200B' },
 		);

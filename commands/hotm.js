@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
+const { SlashCommandBuilder } = require('discord.js');
 const dotenv = require('dotenv');
 
 const embedTemplate = require('../create-embed-template');
@@ -12,8 +12,8 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('hotm')
 		.setDescription('WIP command, I will build on this later')
-		.addStringOption(option => option.setName('minecraft-name').setDescription('your IGN'))
-		.addStringOption(option => option.setName('profile-name').setDescription('the name of your profile')),
+		.addStringOption(option => option.setName('name').setDescription('your IGN'))
+		.addStringOption(option => option.setName('profile').setDescription('the name of your profile')),
 	async execute(interaction) {
 		const profileData = await fetchSkyblockProfile(interaction);
 
@@ -28,11 +28,11 @@ module.exports = {
 			Object.keys(text).forEach((key) => {
 				perks += `**${key}** \t ${text[key]} \n`;
 			});
-			embed.addField('Perks', perks);
+			embed.addFields({ name: 'Perks', value: perks });
 		}
 		catch (err) {
 			if (err instanceof RangeError) {
-				embed.addField('Perks', 'no active perks');
+				embed.addFields({ name: 'Perks', value: 'no active perks' });
 			}
 			else {
 				console.error(err);
@@ -40,7 +40,7 @@ module.exports = {
 		}
 		stats = await stats;
 		console.log(stats);
-		embed.addField('Stats', `Mining speed: ${stats['Mining Speed']}, Mining fortune: ${stats['Mining Fortune']}, Pristine: ${stats['Pristine']}`);
+		embed.addFields({ name: 'Stats', value: `Mining speed: ${stats['Mining Speed']}, Mining fortune: ${stats['Mining Fortune']}, Pristine: ${stats['Pristine']}` });
 
 
 		await interaction.reply({ embeds: [embed] });

@@ -13,8 +13,8 @@ module.exports = fetchSkyblockProfile;
 async function fetchSkyblockProfile(interaction) {
 	// use inputted name or discord nickname if not provided
 	const user = await interaction.guild.members.fetch(interaction.user);
-	const name = interaction.options.getString('minecraft-name') || user.nickname;
-	const fruit = interaction.options.getString('profile-name') || null;
+	const name = interaction.options.getString('name') || user.nickname;
+	const fruit = interaction.options.getString('profile') || null;
 
 	// fetch uuid of given MC account
 	// uuid will have format {id: <uuid>, name: <IGN>}

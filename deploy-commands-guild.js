@@ -14,7 +14,9 @@ for (const file of commandFiles) {
 }
 
 const rest = new REST({ version: '9' }).setToken(process.env.TOKEN);
+throw new Error('change guild ID');
 
-rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID), { body: commands })
+/* rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID), { body: commands })
 	.then(() => console.log('Successfully registered application commands.'))
 	.catch(console.error);
+*/

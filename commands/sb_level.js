@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
+const { SlashCommandBuilder } = require('discord.js');
 const createEmbedTemplate = require('../create-embed-template');
 const calcXp = require('../functionsHypixelAPI/calculate-skill-level');
 const fetchSkyblockProfile = require('../functionsHypixelAPI/fetch-skyblock-profile');
@@ -15,8 +15,8 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('sb_level')
 		.setDescription('calculates a lower estimate of a players skyblock level')
-		.addStringOption(option => option.setName('minecraft-name').setDescription('your IGN'))
-		.addStringOption(option => option.setName('profile-name').setDescription('the name of your profile')),
+		.addStringOption(option => option.setName('name').setDescription('your IGN'))
+		.addStringOption(option => option.setName('profile').setDescription('the name of your profile')),
 	async execute(interaction) {
 		const profileData = await fetchSkyblockProfile(interaction);
 
@@ -313,10 +313,10 @@ module.exports = {
 		const skyblockXPArray = Object.entries(skyblockXP);
 		skyblockXPArray.sort((a, b) => b[1] - a[1]);
 		skyblockXPArray.forEach(xpCriteria => {
-			embed.addField(`SkyBlock Level from ${xpCriteria[0]}`, `${xpCriteria[1] / 100} / ${MAXSBXP[xpCriteria[0]] / 100} `);
+			embed.addFields({ name: `SkyBlock Level from ${xpCriteria[0]}`, value: `${xpCriteria[1] / 100} / ${MAXSBXP[xpCriteria[0]] / 100} ` });
 			totalXP += xpCriteria[1];
 		});
-		embed.addField(`\`Total SkyBlock Level: ${totalXP / 100}\``, '\u200B');
+		embed.addFields({ name: `\`Total SkyBlock Level: ${totalXP / 100}\``, value: '\u200B' });
 
 		await interaction.reply({ embeds: [embed] });
 	},

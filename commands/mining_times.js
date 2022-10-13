@@ -1,6 +1,6 @@
 const { spawn } = require('child_process');
 const embedTemplate = require('../create-embed-template');
-const { SlashCommandBuilder } = require('@discordjs/builders');
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -18,7 +18,7 @@ module.exports = {
 			const title = data.shift();
 			data = data.join('\n');
 			embed.setTitle(title);
-			embed.addField('\u200B', data);
+			embed.addFields({ name: '\u200B', value: data });
 			interaction.reply({ embeds: [embed] });
 		});
 		child_python.stderr.on('data', (data) => {

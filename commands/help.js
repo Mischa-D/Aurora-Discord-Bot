@@ -1,6 +1,6 @@
 const getFiles = require('../get-files');
 const embedTemplate = require('../create-embed-template');
-const { SlashCommandBuilder } = require('@discordjs/builders');
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -19,7 +19,7 @@ module.exports = {
 			for (const option of command.data.options) {
 				title += ` [${option.name}] `;
 			}
-			embed.addField(`/${command.data.name} ${title}`, `${command.data.description}`);
+			embed.addFields({ name: `/${command.data.name} ${title}`, value: `${command.data.description}` });
 		}
 
 		await interaction.reply({ embeds: [embed] });
