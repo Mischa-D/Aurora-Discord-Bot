@@ -120,6 +120,7 @@ async function getMiningStats(profileData, bal = false) {
 	if (bal) {
 		speed *= 1 + petStats.Level * 0.0015;
 		fortune *= 1 + petStats.Level * 0.0015;
+		pristine *= 1 + petStats.Level * 0.0015;
 	}
 
 
