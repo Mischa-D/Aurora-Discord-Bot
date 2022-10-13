@@ -56,7 +56,7 @@ module.exports = {
 			mining_fortune = interaction.options.getInteger('fortune');
 		}
 
-		const block_hardness = 3200;
+		const block_hardness = interaction.options.getInteger('block') || 3200;
 		// calculate ticks needed per block with respect to the softcap of 4 ticks
 		// TODO: instabreaking
 		let ticks_per_block = Math.max(block_hardness * 30 / mining_speed, 4);
@@ -76,7 +76,7 @@ module.exports = {
 		// output
 		const embed = createEmbedTemplate();
 		embed.setTitle('Mining Profits');
-		embed.setDescription('This doesnt work with instabreaking yet, values represent jade (or other gemstones with the same breaking power) when sold to NPC\n');
+		embed.setDescription('This doesnt work with instabreaking yet, works with any gemstone block (defaults to jade)\nProfit is calculated from NPC prices.');
 
 		let text = '';
 		text += `\t - mine \`${blocks}\` blocks\n`;
@@ -84,8 +84,27 @@ module.exports = {
 		text += `\t - get \`${(fortune_drops / (80 * 80)).toFixed(1)}\` Fine Gemstones if there was no Pristine\n`;
 		text += `\t - get \`${(pristine_drops / (80 * 80)).toFixed(1)}\` Fine Gemstones from Pristine alone\n`;
 		text += `\t - get a total of \`${(total / (80 * 80)).toFixed(1)}\` Fine Gemstones\n\n`;
+		let block_name = '';
+		switch (block_hardness) {
+		case 2500:
+			block_name = 'Ruby';
+			break;
+		case 3200:
+			block_name = 'Jade/Sapphire/Amber/Amethyst';
+			break;
+		case 4000:
+			block_name = 'Topaz/Opal';
+			break;
+		case 5000:
+			block_name = 'Jasper';
+			break;
+
+		default:
+			break;
+		}
 		embed.addFields(
 			{ name: 'Stats', value: `Mining speed  \`${mining_speed}\`\nMining fortune \`${mining_fortune}\`\nPristine       \`${pristine}\`` },
+			{ name: 'Block', value: `${block_name} (Hardness \`${block_hardness}\`)` },
 			{ name: 'In 1h you could:', value: text },
 			{ name: `**worth ${(total * 0.0192 / (80 * 80)).toFixed(2)}M when sold to the NPC!**`, value: '\u200B' },
 		);

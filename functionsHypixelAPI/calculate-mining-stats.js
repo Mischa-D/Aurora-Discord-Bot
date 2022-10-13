@@ -78,7 +78,7 @@ async function getMiningStats(profileData, bal = false) {
 		// for bal pets only legendary tier is relevant
 		if (bal) {
 			if (pet.tier == 'LEGENDARY') {
-				petStats.Level = Math.max(petXpPerLevel['LEGENDARY'], petStats.Level);
+				petStats.Level = Math.max(calcXp(pet.exp, petXpPerLevel['LEGENDARY']), petStats.Level);
 				if (pet.heldItem == 'PET_ITEM_QUICK_CLAW') {
 					petStats['Mining Speed'] = Math.floor(petStats.Level / 2);
 					petStats['Mining Fortune'] = Math.floor(petStats.Level / 2);
@@ -118,8 +118,8 @@ async function getMiningStats(profileData, bal = false) {
 	fortune += petStats['Mining Fortune'];
 
 	if (bal) {
-		speed *= petStats.Level * 0.15;
-		fortune *= petStats.Level * 0.15;
+		speed *= 1 + petStats.Level * 0.0015;
+		fortune *= 1 + petStats.Level * 0.0015;
 	}
 
 
@@ -130,7 +130,7 @@ async function getMiningStats(profileData, bal = false) {
 
 	console.log('stats calculated:', speed, fortune, pristine);
 
-	return { 'Mining Speed': speed, 'Mining Fortune': fortune, 'Pristine': pristine };
+	return { 'Mining Speed': Math.round(speed), 'Mining Fortune': Math.round(fortune), 'Pristine': pristine };
 }
 
 
