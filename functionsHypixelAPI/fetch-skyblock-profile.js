@@ -1,8 +1,8 @@
 const dotenv = require('dotenv');
-const https = require('https');
 
 const mojangAPI = require('mojang-promise-api');
 const api = new mojangAPI();
+const getAPIData = require('../functionsHypixelAPI/access-api');
 
 dotenv.config();
 
@@ -26,6 +26,9 @@ async function fetchSkyblockProfile(interaction) {
 		// get HypixelAPI data of that player
 		const url = `https://api.hypixel.net/skyblock/profiles?key=${process.env.HYPIXEL_API_KEY}&uuid=${uuid.id}`;
 		const data = await getAPIData(url);
+		if (JSON.parse(data)['profiles'] == null) {
+			throw new Error('!That player has no Skyblock profiles');
+		}
 
 		// choose the right skyblock profile
 		const profileIndex = await chooseProfile(JSON.parse(data), uuid.id, fruit);
@@ -43,35 +46,6 @@ async function fetchSkyblockProfile(interaction) {
 			throw new Error(`!Couldn't find a user with the name '${name}'`);
 		}
 	}
-}
-
-async function getAPIData(url) {
-
-	return await new Promise((resolve, reject) => {
-		https.get(url, (response) => {
-			let data = '';
-			response.on('data', (chunk) => {
-				data += chunk;
-			});
-
-			response.on('end', () => {
-				if (JSON.parse(data)['success'] == false) {
-					console.error(JSON.parse(data)['cause']);
-					reject(new Error('Something went wrong!'));
-				}
-				else if (JSON.parse(data)['success'] == true && JSON.parse(data)['profiles'] == null) {
-					console.error('Player hasnt played skyblock');
-					reject(new Error('!That player has no Skyblock profiles'));
-				}
-				else {
-					resolve(data);
-				}
-			}).on('error', () => {
-				console.log('Error: No valid API response');
-				throw new Error('!API doesn\'t respond');
-			});
-		});
-	});
 }
 
 
