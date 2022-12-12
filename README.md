@@ -29,10 +29,9 @@ A Discord Bot for Skyblock.
   
   * `profile`:
   
-    `[name] [profile] [bal] [block]` Uses the given profiles fetched best possible mining stats. It will use a bal pet if `bal` is set to true, else it     will look for the best scatha pet.
+    `[name] [profile] [bal] [blue_cheese] [block]` Uses the given profiles fetched best possible mining stats. It will use a bal pet if `bal` is set to true, else it     will look for the best scatha pet. If `blue_cheese` is enabled it will use mining speed boost Lvl. 3 instead of Lvl. 2 in the calculations
     
     
 ## Feature-Queue:
 * changing the output of `mining_times` based on fetched mining speed
-* include blue cheese goblin omelette and hotm perks automatically into calulations
 * new commands
