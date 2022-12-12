@@ -25,11 +25,13 @@ A Discord Bot for Skyblock.
 
   * `manual`:
   
-    `<mining_speed> <mining_fortune> <pristine> [block]` Uses the given mining stats (remember to include hidden stats, i.e. mining speed from professional).
+    `<mining_speed> <mining_fortune> <pristine> [blue_cheese] [block]` Uses the given mining stats (remember to include hidden stats, i.e. mining speed from professional).
   
   * `profile`:
   
-    `[name] [profile] [bal] [blue_cheese] [block]` Uses the given profiles fetched best possible mining stats. It will use a bal pet if `bal` is set to true, else it     will look for the best scatha pet. If `blue_cheese` is enabled it will use mining speed boost Lvl. 3 instead of Lvl. 2 in the calculations
+    `[name] [profile] [bal] [blue_cheese] [block]` Uses the given profiles fetched best possible mining stats.
+
+It will use a bal pet if `bal` is set to true, else it     will look for the best scatha pet. If `blue_cheese` is enabled it will use mining speed boost Lvl. 3 instead of Lvl. 2 in the calculations
     
     
 ## Feature-Queue:
