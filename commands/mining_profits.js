@@ -14,6 +14,7 @@ module.exports = {
 			.addStringOption(option => option.setName('name').setDescription('your IGN'))
 			.addStringOption(option => option.setName('profile').setDescription('the name of your profile'))
 			.addBooleanOption(option => option.setName('bal').setDescription('specify if you want to use bal, else scatha will be used'))
+			.addBooleanOption(option => option.setName('blue_cheese').setDescription('use blue cheese goblin omelet?'))
 			.addStringOption(option => option.setName('block').setDescription('type of gemstone you want to mine')
 				.addChoices(
 					{ name: 'Ruby', value: 'Ruby' },
@@ -29,6 +30,7 @@ module.exports = {
 			.addIntegerOption(option => option.setName('speed').setDescription('mining speed shown in your stats + professional').setRequired(true))
 			.addIntegerOption(option => option.setName('fortune').setDescription('mining fortune shown in your stats + jungle amulet and fortunate').setRequired(true))
 			.addNumberOption(option => option.setName('pristine').setDescription('pristine as shown in your stats').setRequired(true))
+			.addBooleanOption(option => option.setName('blue_cheese').setDescription('use blue cheese goblin omelet?'))
 			.addStringOption(option => option.setName('block').setDescription('type of gemstone you want to mine')
 				.addChoices(
 					{ name: 'Ruby', value: 'Ruby' },
@@ -65,13 +67,20 @@ module.exports = {
 		// TODO: instabreaking
 		let ticks_per_block = Math.max(block_hardness * 30 / mining_speed, 4);
 		let ticks_mining_speed_boost = Math.max(block_hardness * 30 / (mining_speed * 4), 4);
+		let duration_mining_speed_boost = 20;
+
+		// use upgraded mining speed boost from blue cheese goblin omelette
+		if (interaction.options.getBoolean('blue_cheese')) {
+			ticks_mining_speed_boost = Math.max(block_hardness * 30 / (mining_speed * 5), 4);
+			duration_mining_speed_boost = 25;
+		}
 
 		// add 4 ticks to account for human response time and ping
 		ticks_per_block = Number(ticks_per_block.toFixed(0)) + 4;
-		ticks_mining_speed_boost = Number(ticks_mining_speed_boost.toFixed(0)) + 3;
+		ticks_mining_speed_boost = Number(ticks_mining_speed_boost.toFixed(0)) + 2;
 
 		// calculate stats
-		const blocks = ((20 * 3600) / ((ticks_per_block * 100 / 120) + (ticks_mining_speed_boost * 20 / 120))).toFixed(0);
+		const blocks = ((20 * 3600) / (ticks_per_block * ((120 - duration_mining_speed_boost) / 120) + (ticks_mining_speed_boost * duration_mining_speed_boost / 120))).toFixed(0);
 		const base_drops = (blocks * 4.5).toFixed(0);
 		const fortune_drops = (1 + mining_fortune / 100) * base_drops;
 		const pristine_drops = 80 * fortune_drops * (pristine / 100);
