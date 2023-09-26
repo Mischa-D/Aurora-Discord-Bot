@@ -10,6 +10,13 @@ const client = new Discord.Client({
 
 client.once('ready', () => {
 	console.log('Bot online');
+	console.log(`serving on ${client.guilds.cache.size} servers`);
+	client.guilds.cache.forEach(guild => {
+		guild.fetchOwner().then((guildOwner) => {
+			console.log(guild.name, guildOwner.user.username);
+		});
+	});
+
 });
 
 client.on('ready', () => {
